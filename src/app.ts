@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 
 import config from './config';
+import { ErrorHandler } from './handlers';
 
 const app: Application = express();
 const apiVersion = config.API_VERSION || 'v1';
@@ -19,6 +20,6 @@ app.disable('x-powered-by');
 // ================
 
 //error handler
-// ================
+app.use(ErrorHandler.error);
 
 export default app;

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 import app from './app';
 import config from './config';
+import { logger } from './handlers';
 
 const PORT = config.PORT || 5000;
 
@@ -16,5 +17,5 @@ mongoose
     app.listen(PORT, () => console.log(`server running on PORT:: 🚀💥>>> ${PORT}`));
   })
   .catch((_error) => {
-    console.log('error connecting to database');
+    logger.log('error', 'error connecting to database');
   });
