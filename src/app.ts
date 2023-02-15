@@ -5,7 +5,7 @@ import helmet from 'helmet';
 
 import config from './config';
 import { ErrorHandler } from './handlers';
-import { authRoutes } from './routes';
+import { authRoutes, productsRoutes } from './routes';
 
 const app: Application = express();
 const apiVersion = config.API_VERSION || 'v1';
@@ -19,6 +19,7 @@ app.disable('x-powered-by');
 
 //routes
 app.use(`/api/${apiVersion}/auth`, authRoutes);
+app.use(`/api/${apiVersion}/products`, productsRoutes);
 
 //error handler
 app.use(ErrorHandler.error);
