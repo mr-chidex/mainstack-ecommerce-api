@@ -27,6 +27,14 @@ Using Nodejs, Typescript, Express and MongoDB, build a simple ecommerce API with
 
 ## Clone this project
 
+```
+git clone https://github.com/mr-chidex/mainstack-ecommerce-api.git
+```
+
+```
+cd mainstack-ecommerce-api
+```
+
 ## Configure the app
 
 - Create a file named `.env` in the project root directory
