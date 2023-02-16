@@ -6,6 +6,9 @@ const config = {
   NODE_ENV: process.env.NODE_ENV!,
   DATABASE_URL: process.env.DATABASE_URL!,
   SECRET_KEY: process.env.SECRET_KEY!,
+  CLOUD_NAME: process.env.CLOUD_NAME!,
+  API_KEY: process.env.API_KEY!,
+  API_SECRET: process.env.API_SECRET!,
 };
 
 export default config;
