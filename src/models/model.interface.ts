@@ -20,4 +20,5 @@ export interface IProduct {
   rating?: number;
   price: number;
   countInStock: number;
+  productUrl?: string;
 }

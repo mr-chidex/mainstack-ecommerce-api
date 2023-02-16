@@ -41,6 +41,7 @@ const productSchema = new Schema<IProduct>({
     required: true,
     default: 0,
   },
+  productUrl: String,
 });
 
 export const Product = model<IProduct>('Products', productSchema);

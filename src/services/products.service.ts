@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import slugify from 'slugify';
 
 import { logger } from '../handlers';
 import { IProduct, Product } from '../models';
@@ -23,6 +24,7 @@ class ProductsService {
       brand,
       price,
       countInStock,
+      productUrl: slugify(name, { lower: true, strict: true }), //creating a url for the product,
     });
     await product.save();
 
@@ -87,6 +89,15 @@ class ProductsService {
     return product;
   }
 
+  async getProductByUrl(productUrl: string) {
+    const product = await Product.findOne({ productUrl });
+    if (!product) {
+      return errorResponse('Product does not exist', 404);
+    }
+
+    return product;
+  }
+
   async updateProduct(body: IProduct, productId: string, file: File) {
     this.validateProductParams(body);
 
@@ -99,6 +110,7 @@ class ProductsService {
     product.brand = brand || product.brand;
     product.price = price || product.price;
     product.countInStock = countInStock || product.countInStock;
+    product.productUrl = slugify(product.name, { lower: true, strict: true });
 
     const image = await this.updateProductImage(product, file?.path);
     product.image = image || product.image;
