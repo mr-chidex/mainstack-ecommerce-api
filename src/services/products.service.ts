@@ -58,13 +58,18 @@ class ProductsService {
     }
   }
 
-  async getProducts() {
-    const products = await Product.find();
+  async getProducts(query: any) {
+    const total = await Product.countDocuments();
+    const page = parseInt(query?.page) || 1;
+    const limit = parseInt(query?.offset) || total;
+    const start = (page - 1) * limit;
+
+    const products = await Product.find().sort({ _id: -1 }).skip(start).limit(limit);
 
     return {
       success: true,
       message: 'Success',
-      data: products,
+      data: { totalProduct: total, products },
     };
   }
 
