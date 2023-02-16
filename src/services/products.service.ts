@@ -1,5 +1,7 @@
+import mongoose from 'mongoose';
+
 import { logger } from '../handlers';
-import { IProduct, Products } from '../models';
+import { IProduct, Product } from '../models';
 import { errorResponse } from '../utils';
 import cloudinary from '../utils/cloudinary.utils';
 import { validateProductParams } from '../validators';
@@ -7,17 +9,14 @@ import { File } from './service.interface';
 
 class ProductsService {
   async addProduct(body: IProduct, file: File) {
-    const { error } = validateProductParams(body);
-    if (error) {
-      return errorResponse(error.details[0].message, 400);
-    }
+    this.validateProductParams(body);
 
     const { name, description, brand, price, countInStock } = body;
 
     // upload product image to cloudinary
     const image = await this.uploadImage(file?.path);
 
-    const product = new Products({
+    const product = new Product({
       name,
       image,
       description,
@@ -34,6 +33,13 @@ class ProductsService {
     };
   }
 
+  validateProductParams(body: IProduct) {
+    const { error } = validateProductParams(body);
+    if (error) {
+      return errorResponse(error.details[0].message, 400);
+    }
+  }
+
   async uploadImage(path: string | undefined) {
     if (!path) return errorResponse('Product image must be uploaded', 400);
 
@@ -48,6 +54,97 @@ class ProductsService {
       logger.log('error', `Error uploading image: ${err?.message}`);
       return errorResponse('Error uploading image', 400);
     }
+  }
+
+  async getProducts() {
+    const products = await Product.find();
+
+    return {
+      success: true,
+      message: 'Success',
+      data: products,
+    };
+  }
+
+  async getProduct(productId: string) {
+    const product = await this.getProductById(productId);
+
+    return {
+      success: true,
+      message: 'Success',
+      data: product,
+    };
+  }
+
+  async getProductById(productId: string) {
+    if (!mongoose.isValidObjectId(productId)) return errorResponse('invalid product id', 400);
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return errorResponse('Product does not exist', 404);
+    }
+
+    return product;
+  }
+
+  async updateProduct(body: IProduct, productId: string, file: File) {
+    this.validateProductParams(body);
+
+    const { name, description, brand, price, countInStock } = body;
+
+    const product = await this.getProductById(productId);
+
+    product.name = name || product.name;
+    product.description = description || product.description;
+    product.brand = brand || product.brand;
+    product.price = price || product.price;
+    product.countInStock = countInStock || product.countInStock;
+
+    const image = await this.updateProductImage(product, file?.path);
+    product.image = image || product.image;
+
+    await product.save();
+
+    return {
+      success: true,
+      message: 'Product successfully updated',
+      date: product,
+    };
+  }
+
+  async updateProductImage(product: IProduct, path: string | undefined) {
+    if (path) {
+      try {
+        //delete old image
+        product.image.imageId && (await cloudinary.v2.uploader.destroy(product.image.imageId));
+
+        //upload new image
+        const uploadedImage = await cloudinary.v2.uploader.upload(path);
+
+        return {
+          url: uploadedImage.secure_url,
+          imageId: uploadedImage.public_id,
+        };
+      } catch (err: any) {
+        logger.log('error', `Error uploading image: ${err?.message}`);
+        return errorResponse('Error uploading image', 400);
+      }
+    }
+    return null;
+  }
+
+  async deleteProduct(productId: string) {
+    const product = await this.getProductById(productId);
+
+    //delete image
+    product.image.imageId && (await cloudinary.v2.uploader.destroy(product.image.imageId));
+
+    await product.remove();
+
+    return {
+      success: true,
+      message: 'Product successfully deleted',
+    };
   }
 }
 
