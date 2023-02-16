@@ -4,7 +4,7 @@ import { productsService } from '../services';
 
 class ProductsController {
   async addNewProduct(req: Request, res: Response) {
-    const response = await productsService.addProduct(req.body);
+    const response = await productsService.addProduct(req.body, req.file);
     return res.status(201).json({ ...response });
   }
 }
