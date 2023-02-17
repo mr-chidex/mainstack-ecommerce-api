@@ -49,7 +49,6 @@ class ProductsService {
       countInStock,
       productUrl: slugify(name, { lower: true, strict: true }), //creating a url for the product,
     });
-    await product.save();
 
     return {
       success: true,
