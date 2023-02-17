@@ -19,12 +19,11 @@ export class AuthService {
     // hash password
     const hashPassword = await this.hashPassword(password);
 
-    const user = new User({
+    await User.create({
       name,
       email,
       password: hashPassword,
     });
-    await user.save();
 
     return {
       success: true,
@@ -35,14 +34,14 @@ export class AuthService {
   validateRegisterationParams(body: IUser) {
     const { error } = validateRegisterParams(body);
     if (error) {
-      errorResponse(error.details[0].message, 400);
+      return errorResponse(error.details[0].message, 400);
     }
   }
 
   async validateRegisterationEmail(email: string) {
     const isEmail = await this.findUserByEmail(email);
     if (isEmail) {
-      errorResponse('Email already in use', 400);
+      return errorResponse('Email already in use', 400);
     }
   }
 
