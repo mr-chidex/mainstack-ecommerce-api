@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Product } from '../../../models';
+import { IProduct, Product } from '../../../models';
 import { File, productsService } from '../../../services';
 import cloudinary from '../../../utils/cloudinary.utils';
 import { mockProduct } from '../../mocks';
@@ -186,13 +186,13 @@ describe('ProductsService', () => {
       jest.resetAllMocks();
     });
 
-    it('should return new image details file  path is specified', async () => {
+    it('should return new image details if file path is specified', async () => {
       const imageDetails = {
         secure_url: 'secureUrl',
         public_id: 'public_id',
       };
 
-      cloudinary.v2.uploader.destroy = jest.fn().mockResolvedValue(imageDetails);
+      cloudinary.v2.uploader.destroy = jest.fn().mockResolvedValue(null);
 
       cloudinary.v2.uploader.upload = jest.fn().mockResolvedValue(imageDetails);
 
@@ -217,6 +217,62 @@ describe('ProductsService', () => {
       const response = await productsService.updateProductImage(mockProduct, '');
 
       expect(response).toBeFalsy();
+    });
+  });
+
+  describe('updateProduct', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    it('it should update product', async () => {
+      const product = {
+        name: 'test',
+        description: 'test',
+        brand: 'test',
+        price: 1,
+        countInStock: 1,
+        productUrl: 'test',
+        image: {},
+      } as IProduct;
+
+      const save = jest.fn();
+
+      productsService.validateProductParams = jest.fn().mockReturnValue(null);
+      productsService.getProductById = jest.fn().mockResolvedValue({ ...product, save });
+      productsService.updateProductImage = jest.fn().mockResolvedValue(null);
+
+      expect(save).not.toHaveBeenCalled();
+
+      const response = await productsService.updateProduct(product, 'productId');
+
+      expect(response.success).toBe(true);
+      expect(save).toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteProduct', () => {
+    it('should delete product', async () => {
+      const product = {
+        name: 'test',
+        description: 'test',
+        price: 1,
+        countInStock: 1,
+        image: {},
+      };
+
+      const remove = jest.fn();
+
+      productsService.getProductById = jest.fn().mockResolvedValue({ ...mockProduct, remove });
+      cloudinary.v2.uploader.destroy = jest.fn().mockResolvedValue(null);
+
+      expect(remove).not.toHaveBeenCalled();
+
+      const response = await productsService.deleteProduct('id');
+
+      expect(remove).toHaveBeenCalled();
+      expect(response.success).toBe(true);
     });
   });
 });

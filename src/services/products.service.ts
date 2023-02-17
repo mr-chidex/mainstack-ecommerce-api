@@ -125,7 +125,7 @@ class ProductsService {
     return null;
   }
 
-  async updateProduct(body: IProduct, productId: string, file: File) {
+  async updateProduct(body: IProduct, productId: string, file?: File) {
     this.validateProductParams(body);
 
     const { name, description, brand, price, countInStock } = body;
@@ -155,7 +155,7 @@ class ProductsService {
     const product = await this.getProductById(productId);
 
     //delete image
-    product.image.imageId && (await cloudinary.v2.uploader.destroy(product.image.imageId));
+    product.image?.imageId && (await cloudinary.v2.uploader.destroy(product.image.imageId));
 
     await product.remove();
 
