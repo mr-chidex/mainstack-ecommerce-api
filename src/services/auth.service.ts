@@ -35,14 +35,14 @@ export class AuthService {
   validateRegisterationParams(body: IUser) {
     const { error } = validateRegisterParams(body);
     if (error) {
-      return errorResponse(error.details[0].message, 400);
+      errorResponse(error.details[0].message, 400);
     }
   }
 
   async validateRegisterationEmail(email: string) {
     const isEmail = await this.findUserByEmail(email);
     if (isEmail) {
-      return errorResponse('Email already in use', 400);
+      errorResponse('Email already in use', 400);
     }
   }
 
