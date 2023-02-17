@@ -5,7 +5,7 @@ import { User } from '../../../models';
 import { authService } from '../../../services';
 import { mockUser } from '../../mocks';
 
-describe.skip('AuthService', () => {
+describe('AuthService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();

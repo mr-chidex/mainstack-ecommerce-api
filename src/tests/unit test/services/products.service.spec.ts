@@ -253,6 +253,11 @@ describe('ProductsService', () => {
   });
 
   describe('deleteProduct', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
     it('should delete product', async () => {
       const product = {
         name: 'test',
