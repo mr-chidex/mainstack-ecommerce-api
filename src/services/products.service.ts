@@ -57,7 +57,7 @@ class ProductsService {
     };
   }
 
-  async getProducts(query: any) {
+  async getProducts(query?: any) {
     const total = await Product.countDocuments();
     const page = parseInt(query?.page) || 1;
     const limit = parseInt(query?.offset) || total;
@@ -72,6 +72,19 @@ class ProductsService {
     };
   }
 
+  async getProductById(productId: string) {
+    if (!mongoose.isValidObjectId(productId)) {
+      return errorResponse('invalid product id', 400);
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return errorResponse('Product does not exist', 404);
+    }
+
+    return product;
+  }
+
   async getProduct(productId: string) {
     const product = await this.getProductById(productId);
 
@@ -80,17 +93,6 @@ class ProductsService {
       message: 'Success',
       data: product,
     };
-  }
-
-  async getProductById(productId: string) {
-    if (!mongoose.isValidObjectId(productId)) return errorResponse('invalid product id', 400);
-
-    const product = await Product.findById(productId);
-    if (!product) {
-      return errorResponse('Product does not exist', 404);
-    }
-
-    return product;
   }
 
   async getProductByUrl(productUrl: string) {

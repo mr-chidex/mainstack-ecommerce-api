@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Product } from '../../../models';
 import { File, productsService } from '../../../services';
 import cloudinary from '../../../utils/cloudinary.utils';
@@ -60,6 +61,11 @@ describe('ProductsService', () => {
   });
 
   describe('addProduct', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
     it('should add new product', async () => {
       const image = { url: '', imageId: '' };
 
@@ -74,6 +80,103 @@ describe('ProductsService', () => {
 
       expect(response.data).toEqual(mockProduct);
       expect(Product.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('getProducts', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    it('should return all products', async () => {
+      Product.countDocuments = jest.fn().mockResolvedValue(1);
+
+      const limit = jest.fn().mockResolvedValue([mockProduct]);
+      const skip = jest.fn().mockReturnValue({ limit });
+      const sort = jest.fn().mockReturnValue({ skip });
+      Product.find = jest.fn().mockReturnValue({ sort });
+
+      expect(Product.find).not.toHaveBeenCalled();
+
+      const response = await productsService.getProducts();
+
+      expect(response.data.totalProduct).toBe(1);
+      expect(response.data.products).toEqual([mockProduct]);
+      expect(Product.find).toHaveBeenCalled();
+    });
+  });
+
+  describe('getProductById', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    it('should throw error on invalid product id', () => {
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(false);
+
+      expect(productsService.getProductById('id')).rejects.toThrow();
+    });
+
+    it('should throw product not found error if product does not exist', () => {
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+      Product.findById = jest.fn().mockResolvedValue(null);
+
+      expect(productsService.getProductById.bind(this, 'id')).rejects.toThrow('Product does not exist');
+      expect(Product.findById).toHaveBeenCalled();
+    });
+
+    it('should return product', async () => {
+      mongoose.isValidObjectId = jest.fn().mockReturnValue(true);
+
+      Product.findById = jest.fn().mockResolvedValue(mockProduct);
+
+      const response = await productsService.getProductById('id');
+
+      expect(response).toEqual(mockProduct);
+    });
+  });
+
+  describe('getProduct', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    it('should return product', async () => {
+      productsService.getProductById = jest.fn().mockResolvedValue(mockProduct);
+
+      expect(productsService.getProductById).not.toHaveBeenCalled();
+
+      const response = await productsService.getProduct('id');
+
+      expect(response.success).toBe(true);
+      expect(response.data).toEqual(mockProduct);
+      expect(productsService.getProductById).toHaveBeenCalledWith('id');
+    });
+  });
+
+  describe('getProductByUrl', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    it('should throw product not found error if product does not exist', () => {
+      Product.findOne = jest.fn().mockResolvedValue(null);
+
+      expect(productsService.getProductByUrl.bind(this, 'url')).rejects.toThrow('Product does not exist');
+      expect(Product.findOne).toHaveBeenCalled();
+    });
+
+    it('should return product', async () => {
+      Product.findOne = jest.fn().mockResolvedValue(mockProduct);
+
+      const response = await productsService.getProductByUrl('url');
+
+      expect(response).toEqual(mockProduct);
+      expect(Product.findOne).toHaveBeenCalled();
     });
   });
 });
