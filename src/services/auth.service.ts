@@ -9,18 +9,12 @@ import { validateLoginParams, validateRegisterParams } from '../validators';
 export class AuthService {
   async register(body: IUser) {
     //check for errors in body data
-    const { error } = validateRegisterParams(body);
-    if (error) {
-      return errorResponse(error.details[0].message, 400);
-    }
+    this.validateRegisterationParams(body);
 
     const { name, email, password } = body;
 
     // check if email is already in use
-    const isEmail = await this.findUserByEmail(email);
-    if (isEmail) {
-      return errorResponse('Email already in use', 400);
-    }
+    await this.validateRegisterationEmail(email);
 
     // hash password
     const hashPassword = await this.hashPassword(password);
@@ -36,6 +30,20 @@ export class AuthService {
       success: true,
       message: 'Account successfully created',
     };
+  }
+
+  validateRegisterationParams(body: IUser) {
+    const { error } = validateRegisterParams(body);
+    if (error) {
+      return errorResponse(error.details[0].message, 400);
+    }
+  }
+
+  async validateRegisterationEmail(email: string) {
+    const isEmail = await this.findUserByEmail(email);
+    if (isEmail) {
+      return errorResponse('Email already in use', 400);
+    }
   }
 
   async login(body: IUser) {

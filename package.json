@@ -10,7 +10,7 @@
     "build:app": "tsc -p .",
     "build:watch": "tsc --watch",
     "test": "jest",
-    "test:watch": "jest --watchAll  --forceExit --detectOpenHandles",
+    "test:watch": "jest --watchAll --coverage  --forceExit --detectOpenHandles",
     "prepare": "husky install"
   },
   "keywords": [],
