@@ -179,4 +179,44 @@ describe('ProductsService', () => {
       expect(Product.findOne).toHaveBeenCalled();
     });
   });
+
+  describe('updateProductImage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      jest.resetAllMocks();
+    });
+
+    it('should return new image details file  path is specified', async () => {
+      const imageDetails = {
+        secure_url: 'secureUrl',
+        public_id: 'public_id',
+      };
+
+      cloudinary.v2.uploader.destroy = jest.fn().mockResolvedValue(imageDetails);
+
+      cloudinary.v2.uploader.upload = jest.fn().mockResolvedValue(imageDetails);
+
+      const response = await productsService.updateProductImage(
+        { ...mockProduct, image: { url: '', imageId: '' } },
+        'imagePath',
+      );
+
+      expect(response?.url).toBe('secureUrl');
+      expect(response?.imageId).toBe('public_id');
+    });
+
+    it('should throw error on deleting or  uploading image to cloudinary', async () => {
+      cloudinary.v2.uploader.destroy = jest.fn().mockRejectedValue(new Error());
+
+      expect(
+        productsService.updateProductImage({ ...mockProduct, image: { url: '', imageId: '' } }, 'imagePath'),
+      ).rejects.toThrow('Error uploading image');
+    });
+
+    it('should return null if image update is not required', async () => {
+      const response = await productsService.updateProductImage(mockProduct, '');
+
+      expect(response).toBeFalsy();
+    });
+  });
 });
