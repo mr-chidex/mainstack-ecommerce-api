@@ -20,25 +20,15 @@ const models_1 = require("../models");
 const errorResponse_utils_1 = require("../utils/errorResponse.utils");
 const validators_1 = require("../validators");
 class AuthService {
-    register(body) {
+    findUserByEmail(email) {
         return __awaiter(this, void 0, void 0, function* () {
-            //check for errors in body data
-            this.validateRegisterationParams(body);
-            const { name, email, password } = body;
-            // check if email is already in use
-            yield this.validateRegisterationEmail(email);
-            // hash password
-            const hashPassword = yield this.hashPassword(password);
-            const user = new models_1.User({
-                name,
-                email,
-                password: hashPassword,
-            });
-            yield user.save();
-            return {
-                success: true,
-                message: 'Account successfully created',
-            };
+            return yield models_1.User.findOne({ email });
+        });
+    }
+    hashPassword(password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const salt = yield bcrypt_1.default.genSalt(12);
+            return yield bcrypt_1.default.hash(password, salt);
         });
     }
     validateRegisterationParams(body) {
@@ -55,31 +45,24 @@ class AuthService {
             }
         });
     }
-    login(body) {
+    register(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { error } = (0, validators_1.validateLoginParams)(body);
-            if (error) {
-                return (0, errorResponse_utils_1.errorResponse)(error.details[0].message, 400);
-            }
-            const { email, password } = body;
-            const user = yield this.validateCredentials(email, password);
-            const token = this.getToken(user);
+            //check for errors in body data
+            this.validateRegisterationParams(body);
+            const { name, email, password } = body;
+            // check if email is already in use
+            yield this.validateRegisterationEmail(email);
+            // hash password
+            const hashPassword = yield this.hashPassword(password);
+            yield models_1.User.create({
+                name,
+                email,
+                password: hashPassword,
+            });
             return {
                 success: true,
-                message: 'Login successful',
-                data: token,
+                message: 'Account successfully created',
             };
-        });
-    }
-    findUserByEmail(email) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield models_1.User.findOne({ email });
-        });
-    }
-    hashPassword(password) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const salt = yield bcrypt_1.default.genSalt(12);
-            return yield bcrypt_1.default.hash(password, salt);
         });
     }
     validateCredentials(email, password) {
@@ -103,6 +86,22 @@ class AuthService {
             iss: 'mainstack',
             userId: user._id,
         }, config_1.default.SECRET_KEY, { expiresIn: '48h' });
+    }
+    login(body) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { error } = (0, validators_1.validateLoginParams)(body);
+            if (error) {
+                return (0, errorResponse_utils_1.errorResponse)(error.details[0].message, 400);
+            }
+            const { email, password } = body;
+            const user = yield this.validateCredentials(email, password);
+            const token = this.getToken(user);
+            return {
+                success: true,
+                message: 'Login successful',
+                data: token,
+            };
+        });
     }
 }
 exports.AuthService = AuthService;

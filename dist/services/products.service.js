@@ -21,29 +21,6 @@ const utils_1 = require("../utils");
 const cloudinary_utils_1 = __importDefault(require("../utils/cloudinary.utils"));
 const validators_1 = require("../validators");
 class ProductsService {
-    addProduct(body, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.validateProductParams(body);
-            const { name, description, brand, price, countInStock } = body;
-            // upload product image to cloudinary
-            const image = yield this.uploadImage(file === null || file === void 0 ? void 0 : file.path);
-            const product = new models_1.Product({
-                name,
-                image,
-                description,
-                brand,
-                price,
-                countInStock,
-                productUrl: (0, slugify_1.default)(name, { lower: true, strict: true }), //creating a url for the product,
-            });
-            yield product.save();
-            return {
-                success: true,
-                message: 'Product successfully added',
-                data: product,
-            };
-        });
-    }
     validateProductParams(body) {
         const { error } = (0, validators_1.validateProductParams)(body);
         if (error) {
@@ -65,6 +42,29 @@ class ProductsService {
                 handlers_1.logger.log('error', `Error uploading image: ${err === null || err === void 0 ? void 0 : err.message}`);
                 return (0, utils_1.errorResponse)('Error uploading image', 400);
             }
+        });
+    }
+    addProduct(body, file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.validateProductParams(body);
+            const { name, description, brand, price, countInStock } = body;
+            // upload product image to cloudinary
+            const image = yield this.uploadImage(file === null || file === void 0 ? void 0 : file.path);
+            const product = yield models_1.Product.create({
+                name,
+                image,
+                description,
+                brand,
+                price,
+                countInStock,
+                productUrl: (0, slugify_1.default)(name, { lower: true, strict: true }), //creating a url for the product,
+            });
+            yield product.save();
+            return {
+                success: true,
+                message: 'Product successfully added',
+                data: product,
+            };
         });
     }
     getProducts(query) {
@@ -111,27 +111,6 @@ class ProductsService {
             return product;
         });
     }
-    updateProduct(body, productId, file) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.validateProductParams(body);
-            const { name, description, brand, price, countInStock } = body;
-            const product = yield this.getProductById(productId);
-            product.name = name || product.name;
-            product.description = description || product.description;
-            product.brand = brand || product.brand;
-            product.price = price || product.price;
-            product.countInStock = countInStock || product.countInStock;
-            product.productUrl = (0, slugify_1.default)(product.name, { lower: true, strict: true });
-            const image = yield this.updateProductImage(product, file === null || file === void 0 ? void 0 : file.path);
-            product.image = image || product.image;
-            yield product.save();
-            return {
-                success: true,
-                message: 'Product successfully updated',
-                date: product,
-            };
-        });
-    }
     updateProductImage(product, path) {
         return __awaiter(this, void 0, void 0, function* () {
             if (path) {
@@ -151,6 +130,27 @@ class ProductsService {
                 }
             }
             return null;
+        });
+    }
+    updateProduct(body, productId, file) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.validateProductParams(body);
+            const { name, description, brand, price, countInStock } = body;
+            const product = yield this.getProductById(productId);
+            product.name = name || product.name;
+            product.description = description || product.description;
+            product.brand = brand || product.brand;
+            product.price = price || product.price;
+            product.countInStock = countInStock || product.countInStock;
+            product.productUrl = (0, slugify_1.default)(product.name, { lower: true, strict: true });
+            const image = yield this.updateProductImage(product, file === null || file === void 0 ? void 0 : file.path);
+            product.image = image || product.image;
+            yield product.save();
+            return {
+                success: true,
+                message: 'Product successfully updated',
+                date: product,
+            };
         });
     }
     deleteProduct(productId) {
