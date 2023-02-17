@@ -59,7 +59,6 @@ class ProductsService {
                 countInStock,
                 productUrl: (0, slugify_1.default)(name, { lower: true, strict: true }), //creating a url for the product,
             });
-            yield product.save();
             return {
                 success: true,
                 message: 'Product successfully added',
@@ -81,6 +80,18 @@ class ProductsService {
             };
         });
     }
+    getProductById(productId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!mongoose_1.default.isValidObjectId(productId)) {
+                return (0, utils_1.errorResponse)('invalid product id', 400);
+            }
+            const product = yield models_1.Product.findById(productId);
+            if (!product) {
+                return (0, utils_1.errorResponse)('Product does not exist', 404);
+            }
+            return product;
+        });
+    }
     getProduct(productId) {
         return __awaiter(this, void 0, void 0, function* () {
             const product = yield this.getProductById(productId);
@@ -89,17 +100,6 @@ class ProductsService {
                 message: 'Success',
                 data: product,
             };
-        });
-    }
-    getProductById(productId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!mongoose_1.default.isValidObjectId(productId))
-                return (0, utils_1.errorResponse)('invalid product id', 400);
-            const product = yield models_1.Product.findById(productId);
-            if (!product) {
-                return (0, utils_1.errorResponse)('Product does not exist', 404);
-            }
-            return product;
         });
     }
     getProductByUrl(productUrl) {
@@ -154,10 +154,11 @@ class ProductsService {
         });
     }
     deleteProduct(productId) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const product = yield this.getProductById(productId);
             //delete image
-            product.image.imageId && (yield cloudinary_utils_1.default.v2.uploader.destroy(product.image.imageId));
+            ((_a = product.image) === null || _a === void 0 ? void 0 : _a.imageId) && (yield cloudinary_utils_1.default.v2.uploader.destroy(product.image.imageId));
             yield product.remove();
             return {
                 success: true,
