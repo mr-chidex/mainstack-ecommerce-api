@@ -28,6 +28,8 @@ Build a simple ecommerce API with the following features:
 
 ## Host Link
 
+API Endpoint: [Production](https://mainstack-ecommerce-api-production.up.railway.app/)
+
 ## Features
 
 - Authentication and authorization
