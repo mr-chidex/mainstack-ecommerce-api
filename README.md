@@ -1,12 +1,14 @@
 # Mainstack eCommerce API
 
+A simple ecommerce API
+
 ---
 
 TASK DESCRIPTION
 
 ---
 
-Using Nodejs, Typescript, Express and MongoDB, build a simple ecommerce API with the following features:
+Build a simple ecommerce API with the following features:
 
 1. Create, get all and get single product
 2. Update product
@@ -15,15 +17,45 @@ Using Nodejs, Typescript, Express and MongoDB, build a simple ecommerce API with
 
 ---
 
+## Tech Stack
+
+- Node Js
+- Typescript
+- Express
+- MongoDB
+- Jest
+- Postman
+
 ## Host Link
 
 ## Features
 
-## Tech Stack
+- Authentication and authorization
+- CRUD opetaionss and pagination
+- Admin users : Authorized to create, update and delete product
 
 ## Documentation
 
+Postman: [See documentation](https://documenter.getpostman.com/view/11724511/2s93CGSw7C)
+
 ## API Endpoints
+
+Auth
+
+```
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+```
+
+Product
+
+```
+POST /api/v1/products
+GET /api/v1/products
+GET /api/v1/products/:productId
+DELETE /api/v1/products/:productId
+PATCH /api/v1/products/:productId
+```
 
 ## Clone this project
 
