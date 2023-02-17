@@ -7,6 +7,29 @@ import { errorResponse } from '../utils/errorResponse.utils';
 import { validateLoginParams, validateRegisterParams } from '../validators';
 
 export class AuthService {
+  async findUserByEmail(email: string) {
+    return await User.findOne({ email });
+  }
+
+  async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt(12);
+    return await bcrypt.hash(password, salt);
+  }
+
+  validateRegisterationParams(body: IUser) {
+    const { error } = validateRegisterParams(body);
+    if (error) {
+      return errorResponse(error.details[0].message, 400);
+    }
+  }
+
+  async validateRegisterationEmail(email: string) {
+    const isEmail = await this.findUserByEmail(email);
+    if (isEmail) {
+      return errorResponse('Email already in use', 400);
+    }
+  }
+
   async register(body: IUser) {
     //check for errors in body data
     this.validateRegisterationParams(body);
@@ -29,48 +52,6 @@ export class AuthService {
       success: true,
       message: 'Account successfully created',
     };
-  }
-
-  validateRegisterationParams(body: IUser) {
-    const { error } = validateRegisterParams(body);
-    if (error) {
-      return errorResponse(error.details[0].message, 400);
-    }
-  }
-
-  async validateRegisterationEmail(email: string) {
-    const isEmail = await this.findUserByEmail(email);
-    if (isEmail) {
-      return errorResponse('Email already in use', 400);
-    }
-  }
-
-  async login(body: IUser) {
-    const { error } = validateLoginParams(body);
-    if (error) {
-      return errorResponse(error.details[0].message, 400);
-    }
-
-    const { email, password } = body;
-
-    const user = await this.validateCredentials(email, password);
-
-    const token = this.getToken(user);
-
-    return {
-      success: true,
-      message: 'Login successful',
-      data: token,
-    };
-  }
-
-  async findUserByEmail(email: string) {
-    return await User.findOne({ email });
-  }
-
-  async hashPassword(password: string) {
-    const salt = await bcrypt.genSalt(12);
-    return await bcrypt.hash(password, salt);
   }
 
   async validateCredentials(email: string, password: string) {
@@ -99,6 +80,25 @@ export class AuthService {
       config.SECRET_KEY,
       { expiresIn: '48h' },
     );
+  }
+
+  async login(body: IUser) {
+    const { error } = validateLoginParams(body);
+    if (error) {
+      return errorResponse(error.details[0].message, 400);
+    }
+
+    const { email, password } = body;
+
+    const user = await this.validateCredentials(email, password);
+
+    const token = this.getToken(user);
+
+    return {
+      success: true,
+      message: 'Login successful',
+      data: token,
+    };
   }
 }
 
