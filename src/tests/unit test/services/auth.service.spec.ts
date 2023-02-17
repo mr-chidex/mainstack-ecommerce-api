@@ -54,9 +54,7 @@ describe('AuthService', () => {
     it('should throw error if details are not correct', async () => {
       const param = { name: 'test', password: 'invalid', email: 'invalid' };
 
-      authService.validateRegisterationParams = jest.fn().mockReturnValue({ error: true });
-
-      expect(authService.validateRegisterationParams(param)).toEqual({ error: true });
+      expect(authService.validateRegisterationParams.bind(this, param)).toThrow();
     });
 
     it('should return undefined on validating prams', () => {
